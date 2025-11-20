@@ -5,11 +5,13 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { GoogleButton } from '@/components/auth/GoogleButton';
+import { GithubButton } from '@/components/auth/GithubButton';
 import { AuthDivider } from '@/components/auth/AuthDivider';
 import { AuthForm } from '@/components/auth/AuthForm';
 import type { AuthFormData } from '@/components/auth/AuthForm/types';
 import { useAuthForm } from '@/lib/auth/hooks/useAuthForm';
 import { useGoogleAuth } from '@/lib/auth/hooks/useGoogleAuth';
+import { useGithubAuth } from '@/lib/auth/hooks/useGithubAuth';
 import { useAuth } from '@/context/auth-context';
 import { Spinner } from '@/components/ui/spinner';
 import { DEFAULT_LOGIN_REDIRECT } from '@/lib/auth/constants/auth';
@@ -36,13 +38,19 @@ function RegisterContent() {
     onError: (error) => setError(error.message),
   });
 
+  const { loading: githubLoading, handleGithubSignIn } = useGithubAuth({
+    onSuccess: () => router.push(DEFAULT_LOGIN_REDIRECT),
+    onError: (error) => setError(error.message),
+  });
+
   useEffect(() => {
     if (!authLoading && authenticated) {
       router.push(DEFAULT_LOGIN_REDIRECT);
     }
   }, [authenticated, authLoading, router]);
 
-  const isLoading = formLoading || googleLoading || authLoading;
+  const isLoading =
+    formLoading || googleLoading || githubLoading || authLoading;
 
   if (authLoading || (!authLoading && authenticated)) {
     return (
@@ -101,10 +109,15 @@ function RegisterContent() {
           </div>
 
           <div className="mt-10 space-y-6">
-            <div className="w-full">
+            <div className="space-y-3">
               <GoogleButton
                 mode="register"
                 onSuccess={handleGoogleSignIn}
+                isLoading={isLoading}
+              />
+              <GithubButton
+                mode="register"
+                onSuccess={handleGithubSignIn}
                 isLoading={isLoading}
               />
             </div>

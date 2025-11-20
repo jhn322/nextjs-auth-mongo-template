@@ -2,29 +2,27 @@ import { NextAuthOptions } from 'next-auth';
 import { Adapter } from 'next-auth/adapters';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import prisma from '@/lib/prisma';
-// Update import paths to reflect the new location
 import { configureProviders } from './providers';
 import { configureCallbacks } from './callbacks';
-// Import USER_ROLES from auth constants and AUTH_PATHS from the new routes constants
 import { USER_ROLES } from '@/lib/auth/constants/auth';
 import { AUTH_PATHS } from '@/lib/constants/routes';
 
 /**
- * Huvudkonfiguration för NextAuth
+ * Main configuration for NextAuth
  */
 export const authOptions: NextAuthOptions = {
-  // Adapter för att koppla NextAuth till Prisma
+  // Adapter to connect NextAuth to Prisma
   adapter: PrismaAdapter(prisma) as Adapter,
 
-  // Providers för olika inloggningsmetoder
+  // Providers for various login methods
   providers: configureProviders(),
 
-  // Session-hantering
+  // Session-handling
   session: {
     strategy: 'jwt',
   },
 
-  // Anpassade sidor
+  // Custom pages
   pages: {
     signIn: AUTH_PATHS.LOGIN,
     error: AUTH_PATHS.AUTH_ERROR,
@@ -33,20 +31,20 @@ export const authOptions: NextAuthOptions = {
     // newUser: AUTH_PATHS.REGISTER, // Optional: if you want to redirect new users to register or a welcome page
   },
 
-  // Callbacks för att anpassa JWT och session
+  // Callbacks to customize JWT and session
   callbacks: configureCallbacks(),
 
-  // Händelser för autentisering
+  // Events for authentication
   events: {
     /**
-     * Hanterar användarinloggning specifikt för Google-autentisering
-     * - Om användaren finns: Uppdaterar namn och profilbild
-     * - Om ny användare: Skapar konto med USER-roll
-     * Detta säkerställer att databasen hålls synkroniserad med Google-profildata
+     * Handles user login specifically for OAuth authentication (Google and GitHub)
+     * - If the user exists: Update name and profile image
+     * - If new user: Create account with USER role
+     * This ensures that the database is kept in sync with OAuth profile data
      */
     async signIn({ user, account }) {
-      if (account?.provider === 'google') {
-        // Uppdatera eller skapa användare med rätt roll
+      if (account?.provider === 'google' || account?.provider === 'github') {
+        // Update or create user with correct role
         await prisma.user.upsert({
           where: { email: user.email! },
           update: {
@@ -66,6 +64,6 @@ export const authOptions: NextAuthOptions = {
     },
   },
 
-  // Aktivera debugging i utvecklingsmiljö
+  // Enable debugging in development environment
   debug: process.env.NODE_ENV === 'development',
 };

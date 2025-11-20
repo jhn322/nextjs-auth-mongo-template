@@ -37,10 +37,11 @@ export const AUTH_MESSAGES = {
   ERROR_MISSING_FIELDS: 'Please fill in all required fields.',
   ERROR_EMAIL_EXISTS: 'A user with this email already exists.',
   ERROR_EMAIL_EXISTS_OAUTH:
-    'Email already registered via another service (e.g., Google). Try signing in with that instead.',
+    'Email already registered via another service (e.g., Google, GitHub). Try signing in with that instead.',
   ERROR_REGISTRATION_FAILED: 'Registration failed.',
   ERROR_LOGIN_FAILED: 'Sign in failed.',
   ERROR_GOOGLE_SIGNIN_FAILED: 'Sign in with Google failed.',
+  ERROR_GITHUB_SIGNIN_FAILED: 'Sign in with GitHub failed.',
   ERROR_PASSWORD_MISMATCH: 'Passwords do not match.',
   ERROR_PASSWORD_REQUIRED: 'Password is required.',
   ERROR_UNAUTHORIZED: 'You do not have permission to view this page.',
