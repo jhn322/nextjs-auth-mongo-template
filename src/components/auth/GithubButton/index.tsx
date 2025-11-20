@@ -11,6 +11,7 @@ import {
 import { Loader2 } from 'lucide-react';
 
 export const GithubButton = ({
+  mode,
   onSuccess,
   onError,
   isLoading = false,
@@ -48,12 +49,12 @@ export const GithubButton = ({
       {isLoading ? (
         <>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Signing in...
+          {mode === 'login' ? 'Signing in...' : 'Signing up...'}
         </>
       ) : (
         <>
           <GithubIcon />
-          GitHub
+          {mode === 'login' ? 'Sign in with GitHub' : 'Sign up with GitHub'}
         </>
       )}
     </Button>
