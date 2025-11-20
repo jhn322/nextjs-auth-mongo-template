@@ -6,10 +6,10 @@ import { fileURLToPath } from 'url';
 // For this example, I'm assuming a relative path. If your project setup allows for aliases like '@/',
 // that would be preferable, but direct relative paths are more common in standalone scripts.
 // This path assumes 'Postman' directory is at the root, and 'src' is also at the root.
-import { API_AUTH_PATHS, API_APP_PATHS } from '../src/lib/constants/routes.js';
+import { API_AUTH_PATHS } from '../src/lib/constants/routes.js';
 import { APP_NAME } from '../src/lib/constants/site.js'; // Import APP_NAME
 
-// ---------- Konfiguration ----------
+// ---------- Configuration ----------
 const BASE_URL_PLACEHOLDER = '{{baseUrl}}';
 // Sanitize APP_NAME for filenames (e.g., remove spaces)
 const APP_NAME_SANITIZED = APP_NAME.replace(/\s+/g, '');
@@ -30,7 +30,7 @@ const OUTPUT_ENVIRONMENT_FILENAME = path.join(
   `${APP_NAME_SANITIZED}-API.postman_environment.json` // Use sanitized name
 );
 
-// API struktur för Auth
+// API structure for Auth
 const apiRoutes = [
   {
     name: 'NextAuth Core',
@@ -41,20 +41,20 @@ const apiRoutes = [
         method: 'GET',
         path: '/api/auth/csrf',
         description:
-          'Hämtar en CSRF-token som behövs för POST-förfrågningar (t.ex. inloggning, utloggning, registrering).\nKopiera värdet för `csrfToken` från svaret och klistra in det i Postman-miljövariabeln `csrfToken`.',
+          'Retrieves a CSRF token needed for POST requests (e.g., login, logout, registration).\nCopy the value for `csrfToken` from the response and paste it into the Postman environment variable `csrfToken`.',
       },
       {
         name: 'Sign In (Credentials)',
         method: 'POST',
         path: '/api/auth/signin/credentials',
         description:
-          'Loggar in en användare med e-post och lösenord. Kräver en giltig `csrfToken`. Sätter automatiskt cookies vid lyckad inloggning.',
+          'Logs in a user with email and password. Requires a valid `csrfToken`. Automatically sets cookies upon successful login.',
         body: {
           email: '{{testUserEmail}}',
           password: '{{testUserPassword}}',
           csrfToken: '{{csrfToken}}',
-          redirect: false, // Förhindra omdirigering, returnera JSON istället
-          json: true, // Be om JSON-svar
+          redirect: false, // Prevent redirect, return JSON instead
+          json: true, // Request JSON response
         },
       },
       {
@@ -62,14 +62,14 @@ const apiRoutes = [
         method: 'GET',
         path: '/api/auth/session',
         description:
-          'Hämtar information om den aktuella användarsessionen (om inloggad via cookie).',
+          'Retrieves information about the current user session (if logged in via cookie).',
       },
       {
         name: 'Sign Out',
         method: 'POST',
         path: '/api/auth/signout',
         description:
-          'Loggar ut den aktuella användaren. Kräver en giltig `csrfToken`. Tar bort sessionscookies.',
+          'Logs out the current user. Requires a valid `csrfToken`. Removes session cookies.',
         body: {
           csrfToken: '{{csrfToken}}',
         },
@@ -79,144 +79,86 @@ const apiRoutes = [
         method: 'GET',
         path: '/api/auth/signin/google',
         description:
-          'Denna URL används normalt i en webbläsare för att starta Google OAuth-flödet. Den kommer att omdirigera till Google. Kan inte testas fullt ut i Postman utan manuella steg.',
+          'This URL is normally used in a browser to initiate the Google OAuth flow. It will redirect to Google. Cannot be fully tested in Postman without manual steps.',
       },
     ],
   },
   {
     name: 'Custom Auth',
-    description: 'Anpassade autentiserings-endpoints',
+    description: 'Custom authentication endpoints',
     endpoints: [
       {
         name: 'Register User',
         method: 'POST',
         path: API_AUTH_PATHS.REGISTER,
         description:
-          'Registrerar en ny användare via din anpassade `/api/auth/register` slutpunkt. Kräver troligen `csrfToken`.',
+          'Registers a new user via your custom `/api/auth/register` endpoint. Likely requires `csrfToken`.',
         body: {
-          // Anpassa fälten efter din registreringslogik
+          // Adjust fields according to your registration logic
           name: 'Test User',
           email: 'new-test-user@example.com',
           password: 'password1234',
-          csrfToken: '{{csrfToken}}', // Antagande: CSRF behövs
+          csrfToken: '{{csrfToken}}', // Assumption: CSRF required
         },
       },
       {
         name: 'Verify User',
-        method: 'POST', // Eller GET? Anpassa efter din implementation
+        method: 'POST', // Or GET? Adjust according to your implementation
         path: API_AUTH_PATHS.VERIFY_EMAIL,
         description:
-          'Verifierar en användare via din anpassade `/api/auth/verify` slutpunkt. Anpassa body och metod efter behov. Kräver troligen `csrfToken`.',
+          'Verifies a user via your custom `/api/auth/verify` endpoint. Adjust body and method as needed. Likely requires `csrfToken`.',
         body: {
-          token: 'VERIFICATION_TOKEN_FROM_EMAIL_OR_LINK', // Anpassa detta fält
-          csrfToken: '{{csrfToken}}', // Antagande: CSRF behövs
+          token: 'VERIFICATION_TOKEN_FROM_EMAIL_OR_LINK', // Adjust this field
+          csrfToken: '{{csrfToken}}', // Assumption: CSRF required
         },
-      },
-    ],
-  },
-  {
-    name: 'Contacts API',
-    description: 'Endpoints for managing user contacts',
-    endpoints: [
-      {
-        name: 'List Contacts',
-        method: 'GET',
-        path: API_APP_PATHS.CONTACTS_BASE,
-        description:
-          'Hämtar alla kontakter för den inloggade användaren. Kräver giltig session (cookie).',
-      },
-      {
-        name: 'Create Contact',
-        method: 'POST',
-        path: API_APP_PATHS.CONTACTS_BASE,
-        description:
-          'Skapar en ny kontakt för den inloggade användaren. Kräver giltig session (cookie). CSRF-token behövs troligen ej här då det inte är en traditionell formulärpost mot /api/auth, men skadar inte att ha med om servern kräver det för alla POST.',
-        body: {
-          firstName: 'Test',
-          lastName: 'Contactsson',
-          email: 'test.contact@example.com',
-          phone: '123-456789', // Optional
-        },
-      },
-      {
-        name: 'Get Contact by ID',
-        method: 'GET',
-        path: `${API_APP_PATHS.CONTACTS_BASE}/{{testContactId}}`,
-        description:
-          'Hämtar en specifik kontakt med ID. Kräver giltig session (cookie). Ange ett giltigt kontakt-ID i miljövariabeln `testContactId`.',
-      },
-      {
-        name: 'Update Contact',
-        method: 'PUT',
-        path: `${API_APP_PATHS.CONTACTS_BASE}/{{testContactId}}`,
-        description:
-          'Uppdaterar en specifik kontakt med ID. Kräver giltig session (cookie). Ange ett giltigt kontakt-ID i `testContactId`. Skickar endast med de fält som ska uppdateras.',
-        body: {
-          // Exempel: Uppdatera endast telefon och typ
-          phone: '987-654321',
-          type: 'CUSTOMER', // LEAD, CUSTOMER, AMBASSADOR
-        },
-      },
-      {
-        name: 'Delete Contact',
-        method: 'DELETE',
-        path: `${API_APP_PATHS.CONTACTS_BASE}/{{testContactId}}`,
-        description:
-          'Tar bort en specifik kontakt med ID. Kräver giltig session (cookie). Ange ett giltigt kontakt-ID i `testContactId`.',
       },
     ],
   },
 ];
 
-// Skapa Postman collection
+// Create Postman collection
 const collection = {
   info: {
     name: COLLECTION_NAME,
-    description: `Postman collection för ${APP_NAME} API`, // Use APP_NAME
+    description: `Postman collection for ${APP_NAME} API`, // Use APP_NAME
     schema:
       'https://schema.getpostman.com/json/collection/v2.1.0/collection.json',
   },
   item: [],
 };
 
-// Skapa miljövariabler
+// Create environment variables
 const environment = {
   name: ENVIRONMENT_NAME,
   values: [
     {
       key: 'baseUrl',
-      value: 'http://localhost:3000', // Standard för utveckling
+      value: 'http://localhost:3000', // Default for development
       type: 'default',
       enabled: true,
     },
     {
       key: 'csrfToken',
-      value: '', // Fylls i manuellt efter anrop till /api/auth/csrf
-      type: 'secret', // Markera som secret för säkerhet
+      value: '', // Filled in manually after calling /api/auth/csrf
+      type: 'secret', // Mark as secret for security
       enabled: true,
     },
     {
       key: 'testUserEmail',
-      value: 'test@example.com', // Byt till en giltig testanvändare
+      value: 'test@example.com', // Change to a valid test user
       type: 'default',
       enabled: true,
     },
     {
       key: 'testUserPassword',
-      value: 'password123', // Byt till lösenordet för testanvändaren
+      value: 'password123', // Change to the test user's password
       type: 'secret',
-      enabled: true,
-    },
-    {
-      key: 'testContactId',
-      value: '', // Fyll i manuellt med ID för en befintlig kontakt för GET/PUT/DELETE tester
-      type: 'default',
       enabled: true,
     },
   ],
 };
 
-// Funktion för att skapa en request-struktur (förenklad)
+// Function to create a request structure (simplified)
 function createRequestItem(endpoint) {
   const urlPath = endpoint.path;
   const rawUrl = `${BASE_URL_PLACEHOLDER}${urlPath}`;
@@ -234,10 +176,10 @@ function createRequestItem(endpoint) {
         path: pathSegments,
       },
     },
-    response: [], // Tom array för svar
+    response: [], // Empty array for responses
   };
 
-  // Lägg till request body om det finns
+  // Add request body if it exists
   if (endpoint.body) {
     item.request.header.push({
       key: 'Content-Type',
@@ -245,7 +187,7 @@ function createRequestItem(endpoint) {
     });
     item.request.body = {
       mode: 'raw',
-      raw: JSON.stringify(endpoint.body, null, 2), // Formattera JSON
+      raw: JSON.stringify(endpoint.body, null, 2), // Format JSON
       options: {
         raw: {
           language: 'json',
@@ -254,7 +196,7 @@ function createRequestItem(endpoint) {
     };
   }
 
-  // Lägg till event för CSRF-token hämtning
+  // Add event for CSRF token retrieval
   if (endpoint.path === '/api/auth/csrf') {
     item.event = [
       {
@@ -283,39 +225,39 @@ function createRequestItem(endpoint) {
   return item;
 }
 
-// Instruktioner för autentisering
+// Authentication instructions
 const authInstructions = {
   name: 'Authentication Instructions (Cookie Method)',
   request: {
-    method: 'GET', // Ingen faktisk request, bara information
-    url: { raw: '' }, // Tom URL
-    description: `# NextAuth.js Autentisering i Postman
+    method: 'GET', // No actual request, just information
+    url: { raw: '' }, // Empty URL
+    description: `# NextAuth.js Authentication in Postman
 
-NextAuth.js använder **cookie-baserad autentisering**. För att testa endpoints som kräver inloggning i Postman:
+NextAuth.js uses **cookie-based authentication**. To test endpoints that require login in Postman:
 
-1.  **Hämta CSRF Token:** Kör \`GET /api/auth/csrf\` först. Detta sätter \`csrfToken\` i din miljö automatiskt (via Test-skriptet).
-2.  **Logga in:** Kör \`POST /api/auth/signin/credentials\` med dina testanvändaruppgifter (från miljön). Om lyckat, kommer NextAuth.js att returnera sessionscookies som Postman **automatiskt sparar och skickar med** i framtida requests till samma domän (\`{{baseUrl}}\`).
-3.  **Verifiera Session:** Kör \`GET /api/auth/session\` för att se om du är inloggad och se sessionsdata.
-4.  **Testa skyddade endpoints:** Nu kan du anropa andra API-endpoints som kräver inloggning. Postman skickar med cookien automatiskt.
-5.  **Logga ut:** Kör \`POST /api/auth/signout\` (med giltig \`csrfToken\`) för att ta bort cookien.
+1.  **Get CSRF Token:** Run \`GET /api/auth/csrf\` first. This automatically sets \`csrfToken\` in your environment (via the Test script).
+2.  **Sign In:** Run \`POST /api/auth/signin/credentials\` with your test user credentials (from the environment). If successful, NextAuth.js will return session cookies that Postman **automatically saves and sends** in future requests to the same domain (\`{{baseUrl}}\`).
+3.  **Verify Session:** Run \`GET /api/auth/session\` to see if you are logged in and view session data.
+4.  **Test protected endpoints:** Now you can call other API endpoints that require login. Postman automatically sends the cookie.
+5.  **Sign Out:** Run \`POST /api/auth/signout\` (with a valid \`csrfToken\`) to remove the cookie.
 
-**Viktigt:**
-* Se till att din \`{{baseUrl}}\` i Postman-miljön matchar den URL din Next.js-app körs på.
-* Postman hanterar cookies per domän.
-* Google Sign-In kan inte slutföras helt inom Postman på grund av webbläsaromdirigeringar.
+**Important:**
+* Make sure your \`{{baseUrl}}\` in the Postman environment matches the URL your Next.js app is running on.
+* Postman handles cookies per domain.
+* Google Sign-In cannot be fully completed within Postman due to browser redirects.
 `,
   },
 };
 
-// Lägg till instruktioner först
+// Add instructions first
 collection.item.push({
   name: 'README - Authentication',
   item: [authInstructions],
   description:
-    'Viktig information om hur autentisering fungerar i Postman med detta API.',
+    'Important information about how authentication works in Postman with this API.',
 });
 
-// Lägg till alla API-grupper och endpoints
+// Add all API groups and endpoints
 apiRoutes.forEach((group) => {
   const folderItem = {
     name: group.name,
@@ -330,11 +272,11 @@ apiRoutes.forEach((group) => {
   collection.item.push(folderItem);
 });
 
-// Spara collection och environment som JSON-filer
+// Save collection and environment as JSON files
 try {
   fs.writeFileSync(
     OUTPUT_COLLECTION_FILENAME,
-    JSON.stringify(collection, null, 2) // Indentera för läsbarhet
+    JSON.stringify(collection, null, 2) // Indent for readability
   );
   console.log(
     `✅ Postman collection saved to ${path.basename(OUTPUT_COLLECTION_FILENAME)}`
@@ -342,19 +284,19 @@ try {
 
   fs.writeFileSync(
     OUTPUT_ENVIRONMENT_FILENAME,
-    JSON.stringify(environment, null, 2) // Indentera för läsbarhet
+    JSON.stringify(environment, null, 2) // Indent for readability
   );
   console.log(
     `✅ Postman environment saved to ${path.basename(OUTPUT_ENVIRONMENT_FILENAME)}`
   ); // Use dynamic filename
 
-  console.log('\nNästa steg:');
+  console.log('\nNext steps:');
   console.log(
-    `1. Importera ${path.basename(OUTPUT_COLLECTION_FILENAME)} och ${path.basename(OUTPUT_ENVIRONMENT_FILENAME)} i Postman.`
+    `1. Import ${path.basename(OUTPUT_COLLECTION_FILENAME)} and ${path.basename(OUTPUT_ENVIRONMENT_FILENAME)} into Postman.`
   );
-  console.log('2. Välj den importerade miljön (uppe till höger).');
+  console.log('2. Select the imported environment (top right).');
   console.log(
-    '3. Följ instruktionerna i "README - Authentication" för att logga in och testa.'
+    '3. Follow the instructions in "README - Authentication" to sign in and test.'
   );
 } catch (error) {
   console.error('❌ Error writing Postman files:', error);

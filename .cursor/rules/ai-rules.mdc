@@ -1,15 +1,16 @@
 ---
-description: 
-globs: 
+description:
+globs:
 alwaysApply: true
 ---
+
 # AI Rules for egen-lista Project
 
 This file provides guidelines for the AI assistant to generate relevant and consistent code for this project.
 
 ## 1. Project Overview
 
-- **Description:** A web application (`EgenLista`) where users (companies) can register to generate an embeddable sign-up widget/web component or unique QR codes linked to sign-up pages. The primary goal is to enable companies to easily collect contact information for their leads, customers, or ambassadors, building their own customer lists/clubs. Users can later export these collected lists (e.g., as CSV) for use with external SMTP services like Brevo.
+- **Description:** A full-stack web application template for easily creating authentication-protected web applications with Next.js and MongoDB.
 - **Framework:** Next.js (using Turbopack for development).
 
 ## 2. Technical Stack
@@ -55,7 +56,7 @@ This file provides guidelines for the AI assistant to generate relevant and cons
 - **Constants:**
   - **Global Site Constants:** Use `src/lib/constants/site.ts` for application-wide constants like `APP_NAME`.
   - **Route Constants:** Use `src/lib/constants/routes.ts` for all internal page links, API routes, and redirects. Define paths structued by area (e.g., `SITE_PATHS`, `AUTH_PATHS`, `PROTECTED_PATHS`, `API_AUTH_PATHS`, `API_APP_PATHS`).
-  - **Feature-Specific Constants:** For constants related to a specific feature (e.g., auth, contacts), create dedicated files like `src/lib/[feature]/constants/[feature].ts` (e.g., `src/lib/contacts/constants/contacts.ts`). Use these for UI messages (toasts, errors, dialog text, empty states), server action/API error strings, or other recurring text specific to that feature.
+  - **Feature-Specific Constants:** For constants related to a specific feature (e.g., auth), create dedicated files like `src/lib/[feature]/constants/[feature].ts`. Use these for UI messages (toasts, errors, dialog text, empty states), server action/API error strings, or other recurring text specific to that feature.
 
 ## 6. Things to Avoid
 
@@ -71,8 +72,8 @@ This file provides guidelines for the AI assistant to generate relevant and cons
 ## 8. Commenting Style
 
 - **Language:** All comments must be in English.
-- **Clarity:** Comments should clearly explain *what* the code does, especially for complex or non-obvious parts.
-- **No Change Logs:** Do not generate comments describing *what was changed* in an edit.
+- **Clarity:** Comments should clearly explain _what_ the code does, especially for complex or non-obvious parts.
+- **No Change Logs:** Do not generate comments describing _what was changed_ in an edit.
 - **Formatting:** Use the following formats for structure:
   - **H1 (Major Section / File Header):**
     ```typescript
@@ -92,7 +93,7 @@ This file provides guidelines for the AI assistant to generate relevant and cons
     ```typescript
     // Explain a single non-obvious line
     ```
-    *Use sparingly.* Focus on H1-H3 and commenting blocks of code rather than every line.
+    _Use sparingly._ Focus on H1-H3 and commenting blocks of code rather than every line.
 
 ## 9. API Design Conventions
 
@@ -105,14 +106,14 @@ This file provides guidelines for the AI assistant to generate relevant and cons
   - Validate all incoming data (body, params, query) with Zod schemas at the start of each handler.
   - Place schemas in `src/lib/validations/`, structured per feature.
   - Use `safeParse` for validation error handling.
-- **Error Handling:** Differentiate between *expected* errors (part of the application flow) and *unexpected* errors (bugs/exceptions).
+- **Error Handling:** Differentiate between _expected_ errors (part of the application flow) and _unexpected_ errors (bugs/exceptions).
   - **API Routes (Route Handlers):**
-    - Handle *unexpected* server errors (e.g., database connection issues) using `try...catch`, log the error, and return a generic 500 response (`{ message: 'Internal Server Error' }`).
-    - Handle *expected/foreseen* errors (e.g., validation failures, resource not found, conflicts) by returning specific error messages and appropriate 4xx status codes (e.g., `{ message: 'Invalid input' }` with 400).
+    - Handle _unexpected_ server errors (e.g., database connection issues) using `try...catch`, log the error, and return a generic 500 response (`{ message: 'Internal Server Error' }`).
+    - Handle _expected/foreseen_ errors (e.g., validation failures, resource not found, conflicts) by returning specific error messages and appropriate 4xx status codes (e.g., `{ message: 'Invalid input' }` with 400).
   - **Server Actions:**
-    - Handle *expected* errors (e.g., form validation failures) by returning state/messages from the action, typically managed with `useActionState` on the client. Avoid throwing exceptions for expected validation flows.
+    - Handle _expected_ errors (e.g., form validation failures) by returning state/messages from the action, typically managed with `useActionState` on the client. Avoid throwing exceptions for expected validation flows.
   - **UI Components (Server & Client):**
-    - Handle *unexpected* rendering errors or errors during data fetching/effects within specific route segments using `error.tsx` files. These act as React Error Boundaries, provide a fallback UI, and allow recovery attempts via the `reset` function.
+    - Handle _unexpected_ rendering errors or errors during data fetching/effects within specific route segments using `error.tsx` files. These act as React Error Boundaries, provide a fallback UI, and allow recovery attempts via the `reset` function.
     - Use `not-found.tsx` and the `notFound()` function for handling "Not Found" (404) scenarios gracefully.
     - Consider `global-error.tsx` for handling errors in the root layout, although this is less common.
 - **Separation of Concerns:**
@@ -122,26 +123,4 @@ This file provides guidelines for the AI assistant to generate relevant and cons
   - Validate authorization/ownership.
   - Filter sensitive data from responses.
 
-*This is an initial draft based on project configuration files. It should be reviewed and updated as the project evolves.*
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+_This is an initial draft based on project configuration files. It should be reviewed and updated as the project evolves._

@@ -1,12 +1,12 @@
-import { randomBytes } from "crypto";
-import prisma from "@/lib/prisma";
+import { randomBytes } from 'crypto';
+import prisma from '@/lib/prisma';
 
 /**
  * Generates a secure random token for email verification or password reset
  * @returns
  */
 export function generateToken(): string {
-  const token = randomBytes(32).toString("hex");
+  const token = randomBytes(32).toString('hex');
   return token;
 }
 
@@ -93,7 +93,7 @@ export async function validateVerificationToken(
   });
 
   if (!tokenRecord) {
-    // Om ingen token hittades, let's check if it might be expired
+    // if no token is found, return a generic message to avoid email enumeration
     const expiredToken = await prisma.verificationToken.findFirst({
       where: {
         token,
@@ -147,7 +147,7 @@ export async function consumeVerificationToken(
 
     return true;
   } catch (error) {
-    console.error("Error consuming verification token:", error);
+    console.error('Error consuming verification token:', error);
     return false;
   }
 }
@@ -179,7 +179,7 @@ const getVerificationTokenExpires = (): Date => {
  * @returns A random hex string.
  */
 export function generateRawToken(): string {
-  const token = randomBytes(32).toString("hex");
+  const token = randomBytes(32).toString('hex');
   return token;
 }
 
@@ -222,6 +222,6 @@ export const generateAndSaveVerificationToken = async (
       `Failed to generate or save verification token for ${email}:`,
       error
     );
-    throw new Error("Could not process verification token.");
+    throw new Error('Could not process verification token.');
   }
 };

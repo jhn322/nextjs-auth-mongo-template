@@ -1,16 +1,15 @@
 import { JWT } from 'next-auth/jwt';
 import { Session, User, Account, Profile } from 'next-auth';
 import prisma from '@/lib/prisma';
-// Assuming constants are in lib/auth/constants/auth.ts
 import { USER_ROLES } from '@/lib/auth/constants/auth';
 
-//* Callback-konfiguration för NextAuth
+//* Callback-functions for NextAuth.js
 
 export const configureCallbacks = () => ({
   /**
-   ** Körs efter lyckad autentisering men innan session skapas.
-   ** Används här för att automatiskt länka OAuth-konton till befintliga
-   ** användare baserat på email.
+   ** Runs when a user is successfully authenticated.
+   ** This is where you can run any custom logic, such as creating or linking
+   ** accounts, sending emails, etc.
    */
   async signIn({
     user,
@@ -20,7 +19,7 @@ export const configureCallbacks = () => ({
     account: Account | null;
     _profile?: Profile;
   }): Promise<boolean | string> {
-    // Kör bara länkning för OAuth providers (inte credentials)
+    // If the user is already logged in, return true
     if (account && account.provider !== 'credentials' && user.email) {
       try {
         const existingUser = await prisma.user.findUnique({
@@ -28,7 +27,7 @@ export const configureCallbacks = () => ({
           include: { accounts: true },
         });
 
-        // Om användare finns men detta specifika OAuth-konto inte är länkat
+        // If the user is not found, create a new user
         if (
           existingUser &&
           !existingUser.accounts.some(
@@ -37,7 +36,7 @@ export const configureCallbacks = () => ({
               acc.providerAccountId === account.providerAccountId
           )
         ) {
-          // Länka kontot
+          // Create a new account for the user
           await prisma.account.create({
             data: {
               userId: existingUser.id,
@@ -54,22 +53,20 @@ export const configureCallbacks = () => ({
             },
           });
 
-          // Här kan man också uppdatera användarens namn/bild från OAuth-profilen om man vill
+          // Update the user's name and image
           // await prisma.user.update({ where: { id: existingUser.id }, data: { name: user.name, image: user.image } });
         }
       } catch (error) {
         console.error('AUTH: Error linking account in signIn callback:', error);
-        // Returnera false eller en felsida vid oväntat fel under länkning?
-        // För enkelhetens skull låter vi det gå vidare, men loggar felet.
         // return false;
       }
     }
-    // Tillåt alltid inloggning att fortsätta om inga problem uppstod
+    // Always return true to indicate a successful authentication
     return true;
   },
 
   /**
-   * JWT-callback körs varje gång en JWT skapas eller uppdateras
+   * JWT-callback runs when a user is successfully authenticated and returns a JWT.
    */
   async jwt({
     token,
@@ -80,14 +77,14 @@ export const configureCallbacks = () => ({
     _account?: Account | null;
   }) {
     if (user) {
-      // Se till att token får rätt roll, speciellt efter kontolänkning
-      // Hämta användaren från DB igen för att vara säker på att få rätt roll
+      // Add the user's role to the JWT payload
+      // Fetch the user from the database and add their role
       const dbUser = await prisma.user.findUnique({ where: { id: user.id } });
       if (dbUser) {
         token.role = dbUser.role;
       } else {
-        // Fallback om användaren av någon anledning inte hittas
-        token.role = USER_ROLES.USER; // Eller någon annan default/hantering
+        // Fallback to default role if user is not found in the database
+        token.role = USER_ROLES.USER;
         console.error(
           `AUTH: User with id ${user.id} not found in JWT callback`
         );
@@ -97,7 +94,7 @@ export const configureCallbacks = () => ({
   },
 
   /**
-   * Session-callback körs varje gång en session används eller uppdateras
+   * Session-callback runs when a user is successfully authenticated and returns a session.
    */
   async session({ session, token }: { session: Session; token: JWT }) {
     if (session.user && token.sub) {

@@ -25,7 +25,6 @@ export const PUBLIC_ROUTES = [
   AUTH_ROUTES.VERIFY_EMAIL,
   AUTH_ROUTES.AUTH_ERROR,
   '/',
-  '/play/',
   '/termsofservice',
   '/privacypolicy',
 ];

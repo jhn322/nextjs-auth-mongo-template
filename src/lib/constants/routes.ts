@@ -7,7 +7,6 @@
 export const SITE_PATHS = {
   HOME: '/',
   ABOUT: '/about-us',
-  CONTACT: '/contact-us',
   TERMS: '/terms-of-service',
   PRIVACY: '/privacy-policy',
 } as const;
@@ -18,7 +17,7 @@ export const AUTH_PATHS = {
   REGISTER: '/auth/register',
   FORGOT_PASSWORD: '/auth/forgot-password',
   RESET_PASSWORD: '/auth/reset-password',
-  VERIFY_EMAIL_INFO_PAGE: '/auth/verify-email', // Page shown when email verification is pending or to request a new link
+  VERIFY_EMAIL_INFO_PAGE: '/auth/verify-email',
   AUTH_ERROR: '/auth/error', // Placeholder, page not yet created
   UNAUTHORIZED: '/auth/unauthorized', // Placeholder, page not yet created
 } as const;
@@ -28,26 +27,16 @@ export const PROTECTED_PATHS = {
   SETTINGS_BASE: '/settings',
   DOCUMENTATION_BASE: '/documentation',
   DASHBOARD_BASE: '/dashboard',
-  // Reuse these for other protected paths e.g., settings, etc.
 } as const;
 
 // ** API Authentication Paths ** //
 // These might be implicitly handled by NextAuth.js, but good to have if directly used
 export const API_AUTH_PATHS = {
   REGISTER: '/api/auth/register',
-  VERIFY_EMAIL: '/api/auth/verify-email', // API endpoint that handles the token
-  RESEND_VERIFICATION_EMAIL: '/api/auth/resend-verification', // API endpoint to resend verification
-  FORGOT_PASSWORD: '/api/auth/forgot-password', // API endpoint to request password reset
-  RESET_PASSWORD: '/api/auth/reset-password', // API endpoint to reset password with token
-} as const;
-
-// ** API Application-Specific Paths ** //
-export const API_APP_PATHS = {
-  CONTACTS_BASE: '/api/contacts',
-  // For dynamic paths like /api/contacts/[id], construct them in your code using this base:
-  // e.g., `${API_APP_PATHS.CONTACTS_BASE}/${contactId}`
-  // Or, a helper function can be added here if preferred:
-  // CONTACT_BY_ID: (id: string) => `/api/contacts/${id}`,
+  VERIFY_EMAIL: '/api/auth/verify-email',
+  RESEND_VERIFICATION_EMAIL: '/api/auth/resend-verification',
+  FORGOT_PASSWORD: '/api/auth/forgot-password',
+  RESET_PASSWORD: '/api/auth/reset-password',
 } as const;
 
 // ** Default Redirects ** //
@@ -70,9 +59,6 @@ export const PUBLIC_ROUTE_PATTERNS: string[] = [
   AUTH_PATHS.RESET_PASSWORD,
   AUTH_PATHS.VERIFY_EMAIL_INFO_PAGE, // This is '/auth/verify-needed'
   AUTH_PATHS.AUTH_ERROR,
-  // The actual email verification link (e.g., /api/auth/verify-email?token=...)
-  // is handled by the API route and middleware (isApiAuthRoute).
-  // It doesn't need to be listed here as a page pattern.
 ];
 
 // ** API Route Prefixes ** //
@@ -81,10 +67,3 @@ export const API_AUTH_ROUTE_PREFIX = '/api/auth'; // Default NextAuth prefix
 
 // ** Special Route Identifiers (if needed by middleware or logic) ** //
 export const ROOT_PATH = '/';
-
-// Paths that should use a minimal layout (e.g., no Navbar/Footer)
-// Includes auth paths and public signup paths
-export const ISOLATED_LAYOUT_PATHS = [
-  ...Object.values(AUTH_PATHS),
-  '/signup/:path*', // Match /signup/ and any sub-paths like /signup/[userId]/tack
-];
